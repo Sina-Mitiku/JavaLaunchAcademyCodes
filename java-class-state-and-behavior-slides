@@ -1,0 +1,233 @@
+# Java State and Behavior
+
+---
+
+## Java is Object Oriented
+
+- We define classes to mimic real-world objects via metaphor
+- Objects have state and behavior
+- In Java, conventionally, all state is `private`
+- We expose state via `getters` and `setters`
+
+---
+
+## Java is Statically Typed
+
+- We must define the data types of our state
+- We must be explicit about the types of arguments and return values
+
+---
+
+## Metaphor
+
+Imagine we're building a hotel reservation system.
+
+- What state would a `Reservation` have?
+- What behavior would a `Reservation` have?
+- What state would a `HotelRoom`
+- What state would a `Hotel` have?
+- What behaviors would a `Hotel` have?
+
+---
+
+## Let's Build a HotelRoom Abstraction
+
+---
+
+## The Default Constructor
+
+```java
+public class HotelRoomRunner {
+  public static void main(String[] args) {
+    HotelRoom room = new HotelRoom();
+  }
+}
+```
+
+- By default, any custom object **inherits** the default constructor
+- Currently, our object has no state. How can you tell?
+
+---
+
+## What's true About a Hotel Room when constructed?
+
+---
+
+## When constructed a Hotel room:
+
+- Has a room number
+- Has a sleep occupancy
+- Is unoccupied
+- Is clean
+
+---
+
+## HotelRoom Construction
+
+```java
+public class HotelRoom {
+  public HotelRoom(String roomNumber, int sleepOccupancy) {
+  }
+}
+```
+
+- We name the constructor method to match the class name
+- A constructor does not specify a `return` value
+- A constructor is generally always `public`
+
+---
+
+## HotelRoom Initial State
+
+```java
+public class HotelRoom {
+  private String roomNumber;
+  private int sleepOccupancy;
+  private boolean occupied;
+  private Boolean clean;
+
+  public HotelRoom(String roomNumber, int sleepOcc) {
+    this.roomNumber = roomNumber;
+    this.sleepOccupancy = sleepOcc;
+    occupied = false;
+    clean = true;
+  }
+}
+```
+
+- `roomNumber` and `sleepOccupancy` are passed to the constructor
+- `occupied` and `clean` have reasonable defaults
+- We have options regarding the `this` keyword - but it's super readable to use it!
+- We also have options regarding primitive types vs Classes (see `boolean` vs `Boolean`) - which is preferable?
+
+---
+
+## Overloading Our Constructor
+
+```java
+public HotelRoom() {
+  this.roomNumber = 217;
+  this.sleepOccupancy = 1;
+  this.occupied = false;
+  this.clean = true;
+}
+```
+
+- We define a second constructor above or below our original
+- It takes in a different number of parameters
+
+---
+
+## Getters
+
+```java
+public String getRoomNumber() {
+  return this.roomNumber;
+}
+```
+
+- Conventionally, Java getters match the state variable name, and are passed zero arguments
+- It should generally return the same data type
+- Note Java also likes the `this.` keyword. As opposed to JavaScript, its use in Java is a lot more intuitive
+
+---
+
+## Getters - You Don't Always Need This... but you should use it anyway
+
+```java
+public String getRoomNumber() {
+  return roomNumber;
+}
+```
+Functionally the same, but will get confusing if you have `this` in some places and not in others
+
+```java
+public String getRoomNumber() {
+  return this.roomNumber;
+}
+```
+
+Just be consistent in what you choose to do.
+
+---
+
+## Why Not Just Expose the Data with a `public` property?
+
+- We may want to log each time the room number is accessed
+- We may want to authorize the user before giving them the room number
+
+This is **behavior**. So, we conventionally always define a **getter**
+
+---
+
+## Immutable Data
+
+Once a room is constructed, what can change?
+
+- You can't change the room number
+- You can't easily change the sleep occupancy
+- The `clean` and `occupied` states are volatile, and can change for the life of the object
+
+---
+
+## Choosing Your Setters to Advance Your Metaphor
+
+```java
+public void setClean(Boolean isClean) {
+  this.clean = isClean;
+}
+```
+
+Traditional setter, but does not advance the metaphor.
+
+---
+
+```java
+public void checkInGuest() {
+  this.clean = false;
+  this.occupied = true;
+}
+
+public void checkOutGuest() {
+  this.occupied = false;
+}
+
+public void serviceRoom() {
+  this.clean = true;
+}
+
+public Boolean isClean() {
+  return this.clean;
+}
+
+public Boolean isOccupied() {
+  return this.occupied
+}
+```
+
+These methods *_enhance the metaphor_*, making the program more understandable by humans.
+
+- Which of these are mutators?
+- Which of these are getters?
+
+---
+
+## Calculations
+
+- We should always maintain as little state in memory as possible.
+- Anything that can be derived off of state should be exposed as **behavior**
+
+```java
+public String getDescription() {
+  return "Room #" + this.roomNumber + " (Sleeps " + this.sleepOccupancy + ")";
+}
+```
+
+---
+
+## Key Takeways
+
+- Constructors must be `public` and match the class' name
+- Java exposes state through **getter** and **setter** behavior
+- State is otherwise `private` by default
+- Take care in advancing your metaphor to ensure your programs are coherent to other developers and your future self
