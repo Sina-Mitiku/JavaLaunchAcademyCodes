@@ -1,0 +1,144 @@
+## Encapsulation
+
+We've secretly been encapsulating all along!
+
+Classes are a form of encapsulation.
+
+---
+### Defining Encapsulation in OOP
+> In object-oriented programming, encapsulation refers to the bundling of data with the methods that operate on that data, or the restricting of direct access to some of an object's components
+
+---
+
+### How we're using it now
+
+```java
+public class Person{
+  private String name;
+
+  public Person(String name){
+    this.name = name;
+  }
+
+  public String getName(){
+    return this.name;
+  }
+
+  public void setName(String name){
+    this.name = name;
+  }
+}
+```
+
+---
+
+### In Short
+
+All attributes of a class *_MUST_* be accessed or updated by a getter or a setter.
+
+---
+### Public vs Private a quick aside
+
+* Access modifiers which determine what other classes can use a particular field or method.
+* Public allows all other classes in your program to read and write the attribute or invoke the method
+* Private ensures
+* Attributes can only be read or written by the class they belong to
+* Methods can only be invoked within the class they are defined in
+
+---
+
+## Method Overloading
+
+Java allows us, and encourages us, to create multiple versions of the same method.
+
+We do this because Java gives us no way to define default arguments or allow optional arguments.
+
+---
+### Consider this pattern
+
+```java
+public String personDetails(String firstName, String lastName, int age){
+  StringBuilder builder = new StringBuilder();
+  builder.append("This record is for");
+  if(firstName != null){
+    builder.append(firstName);
+  } else {
+    builder.append("not provided");
+  }
+  if(lastName != null){
+    builder.append(lastName);
+  } else {
+    builder.append("not provided");
+  }
+  if(age != null){
+    builder.append(age);
+  } else {
+    builder.append("not provided");
+  }
+  return builder.toString();
+}
+```
+
+#### note - Java won't really let us do this.
+
+---
+
+### A better way
+
+Consider this scenario. We've added a `vaccinationStatus` attribute to our person and need to be able to have other classes check that information. We are also practicing encapsulation here by validating the record before returning it. 
+
+```java
+public String checkVaccinationStatus(String firstName, String lastName, int age){
+  if (this.firstName == firstName && this.lastName == lastName && this.age == age){
+  StringBuilder builder = new StringBuilder();
+  builder.append("This record for:");
+  builder.append(firstName);
+  builder.append(lastName);
+  builder.append(age);
+  builder.append(this.vaccinationStatus)
+  return builder.toString();
+}
+else {
+  return "There is no record of this person"
+}
+}
+```
+---
+### But what if they only have the last name?
+
+```java
+public String checkVaccinationStatus(String lastName, int age){
+  if (this.lastName == lastName && this.age == age){
+    StringBuilder builder = new StringBuilder();
+    builder.append("This record for:");
+    builder.append(this.firstName);
+    builder.append(lastName);
+    builder.append(age);
+    builder.append(this.vaccinationStatus)
+    return builder.toString();
+  } else {
+    return "There is no record of this person"
+  }
+}
+```
+
+---
+### But wait, there's more
+
+We can build as many versions of the method as we need to
+
+```java
+public String checkVaccinationStatus(int age, String lastName){
+  StringBuilder builder = new StringBuilder();
+  builder.append("This record for:");
+  builder.append(this.firstName);
+  builder.append(this.lastName);
+  builder.append(age);
+  builder.append(this.vaccinationStatus)
+  return builder.toString();
+}
+```
+
+---
+### In short
+In order to call Java methods with a different number of arguments, or with different types of arguments, we must define the different variants separately, through a process known as overloading the method.
