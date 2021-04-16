@@ -1,0 +1,138 @@
+## Java Data Structures
+
+* Array List
+* HashMap
+
+---
+
+## Array Lists
+
+* Object which holds an Array
+* Part of the Collections Framework
+
+---
+
+## ArrayList Mutative Methods
+
+* `arrayListName.add(itemToAdd)`
+  - Adds item to the end of the ArrayList
+* `arrayListName.add(index,itemToAdd)`
+  - Adds item at the index provided, everything else slides back
+* `arrayListName.remove(0)`
+  - Returns the object from the index provided, the item is removed from the list. Other items move forward
+* `arrayListName.remove(itemToRemove)`
+  - Removes the first item which matches the argument provided. Other items move forward
+  - Returns true or false  
+* `arrayListName.clear()`
+  - Removes all items from array
+* `arrayListName.trimToSize();`
+  - Mostly used for memory management
+  - `trimToSize()` will remove excess "slots"
+  - ArrayList will auto resize to allow new items.
+
+---
+
+## ArrayList Non-Mutative Methods
+  * `arrayListName.get(0)`
+    - Returns the object from the index provided, the item remains in the list
+  * `arrayListName.contains(itemToFind)`
+    - returns true if the item is in the array
+    - returns false if the item is not in the array
+  * `arrayListName.indexOf(itemToFind)`
+    - returns the index if the item is found
+    - returns `-1` if the item is not in the array
+  * `arrayListName.size()`
+    - returns number of items in the array as an integer
+
+---
+
+## ArrayList Iteration
+
+```java
+for (ObjectType nameOfItem : nameOfArray) {
+  System.out.println(nameOfItem)
+}
+```
+  * ObjectType - Type of object we will be iterating over.
+    - String, Integer, etc
+    - An instance of a class object i.e `SpaceShip`
+  - nameOfItem - the individual object we are iterating over
+  - nameOfArray - the array we are iterating over
+
+---
+
+## In English
+
+```java
+for (SpaceShip ship : SpaceShips){
+  System.out.println(ship)
+}
+```
+
+For each SpaceShip object in the SpaceShips array
+
+---
+
+## HashMaps
+
+`Map <ObjectType, ObjectType> hashMapName = new HashMap<>`
+
+* `Map` is an interface which provides us with methods to implement our HashpMap
+* `<ObjectType, ObjectType>` What we are expecting our `key` and our `value` to be
+  - `<String, String>` both key and value must be strings
+  - `<String, SpaceShip>` the key will be a String, the value will be a SpaceShip object
+* `hashMapName` the variable name for the hashmap
+* `new HashMap<>` initialize a new HashMap `<>` is shorthand to match the generics on the left side of the equation.
+  - Each `key` in the HashMap must be unique
+  - This is equivalent to `new HashMap<ObjectType, ObjectType>`
+
+---
+
+## HashMap methods
+
+* `hashMapName.put(itemToPutKey, itemToPutValue)`
+  - add a new item to the HashMap
+  - Key always comes first, value always comes second
+* `ObjectType objectName = hashMapName.get(keyToRetrieve)`
+  - returns the value of the HashMap entry whose key matches the argument
+  - returns null if the key is not found
+* `ObjectType objectName = hashMapName.remove(keyToRemove)`
+  - returns the value of the HashMap entry whose key matches the argument
+  - removes the entry from the HashpMap
+* `hashMapName.clear()`
+  - no return value
+  - removes all entries from HashMap
+
+---
+
+## HashMap Keys
+
+`Set<ObjectType> nameForObjects = hashMapName.keySet()`
+
+* `Set` interface which provide us a collection of each Key in the HashMap
+  - each value must be unique
+  - allows for 1 `null` value
+* `<ObjectType>` the type of object we expect each key to be
+* `nameForObjects` the variable name which we will store our `keySet` in
+* `hashMapName.keySet()` calling the `keySet()` method on our `HashMap`
+
+---
+
+## HashMap Values
+
+`Collection<ObjectType> nameForObjects = hashMapName.values();`
+
+`Collection` interface which provides a collection of each Value in the HashMap
+
+---
+
+## HashMap Iteration
+
+```java
+Set<ObjectType> nameForObjects = hashMapName.keySet();
+for(ObjectType nameForObject : nameForObjects) {
+  System.out.println(nameForObject);
+}
+```
+
+In the code here we are defining our keySet `Set` and then immediately iterating over it using the specialized for loop we've discussed above
