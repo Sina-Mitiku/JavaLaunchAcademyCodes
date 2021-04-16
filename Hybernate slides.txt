@@ -1,0 +1,200 @@
+# Working with Hibernate
+
+---
+
+## Talking to Databases
+
+- JSON files and API's can only take us so far
+- We've seen the power of databases to:
+  - expedite data retrieval
+  - eliminate duplication in our data
+  - provide reusable structures for our data
+
+---
+
+## So How do we Database in Java?
+
+- We can write SQL commands manually and send them through a Java Database Connection (JDBC)
+- ~~We can use~~  there exists: "old" Hibernate
+- We will use JPA-compliant Hibernate
+
+---
+
+## Java Without ORM
+
+```java
+Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+stmt = conn.createStatement();
+String sql = "SELECT id, first_name, last_name, age FROM registrations";
+ResultSet rs = stmt.executeQuery(sql);
+while(rs.next()){
+  //Retrieve by column name
+  int id  = rs.getInt("id");
+  int age = rs.getInt("age");
+  String first = rs.getString("first_name");
+  String last = rs.getString("last_name");
+
+  //Display values
+  System.out.print("ID: " + id);
+  System.out.print(", Age: " + age);
+  System.out.print(", First: " + first);
+  System.out.println(", Last: " + last);
+}
+rs.close();
+```
+
+---
+
+## Like Our Work with the PG NPM Package...
+
+- Dealing with database schema changes becomes cumbersome
+  - Update your schema? Gonna have to manually update any code that used it :(
+- Using data structures does not improve our metaphor / abstraction
+- Writing `INSERT` and `UPDATE` statements to persist data is not intuitive
+
+---
+
+## Enter Hibernate
+
+- First released in 2001
+- A pioneer in ORM and an inspiration for many ORM's in the development community
+  - ActiveRecord
+  - Django ORM
+  - Sequelize
+
+---
+
+## Object Relational Mapping (ORM)
+
+- Bridges the gap between our database tables and Java objects
+- Can handle saving, retrieving, deleting, and relating our objects together
+
+---
+
+## Enter the JPA
+
+- **J**ava **P**ersistence **A**pi
+- The Java Persistence API was created to **standardize** the way in which Java developers interact with databases
+- Hibernate adopted the JPA in 2006
+
+---
+
+## Hibernate vs. the JPA
+
+- So, there is a Hibernate (legacy) way of doing things and a JPA compliant way of working with databases
+- We'll be teaching the JPA compliant version of Hibernate
+
+---
+
+## Hibernate Sessions and the JPA
+
+- When working with the JPA, we use an `EntityManager` in conjunction with annotated classes
+- We also use POJOs called Beans (Java Beans... get it?)
+- These are very simple Java objects that help us interface between our code and the database
+- Instead of using a constructor to instantiate the object we use the annotated class's (aka entity) setters.
+
+---
+
+## What does an annotated class look like?
+
+```java
+@Entity
+@Table(name = "cats")
+public class Cat {
+  @Id
+  @SequenceGenerator(name="cat_generator", sequenceName="cat_id_seq",
+   allocationSize = 1)
+  @GeneratedValue(strategy=GenerationType.SEQUENCE,
+   generator="cat_generator")
+  @Column(name="id", nullable=false, unique=true)
+  private Long id;
+
+  @Column(name="name", nullable=false)
+  private String name;
+
+  public Long getId() {
+    return id;
+  }
+  public void setId(Long id) {
+    this.id = id;
+  }
+  public String getName() {
+    return weight;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+}
+```
+
+---
+
+## Configuration
+
+- We used to have to manually add classes to hibernate, whereas the JPA picks them automatically
+- With the JPA we use a `META-INF/persistence.xml` for JPA related functions
+  - XML, but not nearly as painful as the old XML config files
+
+---
+
+## The new hotness
+
+```xml
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+  <!-- Define persistence unit -->
+  <persistence-unit name="com.launchacademy.javaTodos">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/java_todos" />
+      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+      <property name="javax.persistence.jdbc.user" value="postgres" />
+      <property name="javax.persistence.jdbc.password" value="password" />
+    </properties>
+  </persistence-unit>
+</persistence>
+```
+---
+
+## The EM and EMF
+
+```java
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+public class Main {
+  public static void main(String[] args) {
+    EntityManagerFactory emf =
+        Persistence.createEntityManagerFactory("com.launchacademy.movies");
+    EntityManager em = emf.createEntityManager();
+    try {
+      // our database interactions can go here
+    }
+    finally {
+      em.close();
+      emf.close();
+    }
+  }
+}
+```
+
+---
+
+```java
+
+  try {
+    Movie movie = new Movie();
+    movie.setTitle("Space Odyssey");
+    movie.setYear(201);
+    em.getTransaction().begin();
+    em.persist(movie);
+    em.getTransaction().commit();
+  }
+  finally {
+    em.close();
+    emf.close();
+  }
+
+
+```
