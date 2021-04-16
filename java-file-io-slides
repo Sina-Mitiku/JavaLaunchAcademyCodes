@@ -1,0 +1,241 @@
+# Reading and Writing Files w/ Java
+
+---
+
+## Learning Goals
+
+- Work with the Java `File` object
+- Read in a file
+- Write to a file
+
+---
+
+## The File Class
+
+- Read the docs: [Java File Object](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/File.html)
+- Remember the concepts behind _metaphor_
+  - What do you need to **construct** a file instance?
+  - How do you create a file?
+  - You can ask whether the file **exists**
+  - You can **delete** the file
+
+---
+
+## Using Files
+
+- Memory (RAM) vs hard drive
+- We use the file system to persist info we can't hold in memory
+- We load the pieces we need
+
+---
+
+## Constructing a File
+
+Supply a file path as an argument
+
+```java
+import java.io.File;
+
+public class FileConstructor {
+  public static void main(String[] args) {
+    File aFile = new File("./existingFile.txt");
+    System.out.println(aFile.toString());
+  }
+}
+```
+
+---
+
+## Creating a New File
+
+```java
+import java.io.File;
+import java.io.IOException;
+
+public class FileCreator {
+  public static final String FILE_TO_CREATE = "./newFile.txt";
+
+  public static void main(String[] args) throws IOException {
+    File fileToCreate = new File(FILE_TO_CREATE);
+    fileToCreate.createNewFile();
+
+    if (fileToCreate.exists()) {
+      System.out.println("File created.");
+    }
+  }
+}
+```
+
+---
+
+## The `throws` Keyword
+
+- Java requires you to anticipate that an error can happen
+- Each error is *typed*
+- Don't forget to `import java.io.IOException;`
+
+---
+
+## Exceptions: What can go wrong?
+
+- The hard drive is out of disk space
+- The hard drive is corrupted
+- You don't have permissions to write where you want to write
+
+With Java, you have to *explicitly expect* these types of problems.
+
+---
+
+## Checking to See if a File Exists
+
+```java
+import java.io.File;
+
+public class FilePlay {
+  public static final String BAD_FILE_PATH = "./aLog.txt";
+
+  public static void main(String[] args) {
+    File nonExistentFile = new File(BAD_FILE_PATH);
+    if (nonExistentFile.exists()) {
+      System.out.println("File " + BAD_FILE_PATH + " exists!");
+    } else {
+      System.out.println("File does not exist");
+    }
+  }
+}
+```
+
+---
+
+## Deleting a File
+
+```java
+import java.io.File;
+import java.io.IOException;
+
+public class DeleteFile {
+  public static void main(String[] args) throws IOException {
+    File aFile = new File("./fileToDelete.txt");
+    aFile.createNewFile();
+    aFile.delete();
+    if (!aFile.exists()) {
+      System.out.println("File deleted.");
+    }
+  }
+}
+```
+
+---
+
+## Many Ways to Read a File
+
+- Use a `BufferedReader`
+- Use an `InputStream` or `FileInputStream`
+- Use an `InputStreamReader`
+- Use a `FileReader`
+- Use a `Scanner`
+
+---
+
+## Welcome to Java!
+
+---
+
+## tl;dr
+
+### Use Scanner
+
+---
+
+## Reading a File w/ Scanner
+
+```java
+import java.io.IOException;
+import java.util.Scanner;
+import java.io.File;
+
+public class LoremDemo {
+  public static String PROSE_PATH = "./lorem.txt";
+
+  public static void main(String[] args) throws IOException {
+    File proseFile = new File(PROSE_PATH);
+    Scanner scanner = new Scanner(proseFile);
+    String allContent = scanner.useDelimiter("\\z").next();
+    System.out.println(allContent);
+    scanner.close();
+  }
+}
+```
+
+---
+
+## Important Delimiters
+
+- `\z` for the file's **z**enith
+- `\n` for a new line (allows you to read line by line)
+- Many options to read (both for file and standard IO): [Scanner Cheat Sheet](https://www.java-forums.org/blogs/penguincoder/1562-scanner-class-cheat-sheet.html)
+
+---
+
+## Many Ways to Write a File
+
+- Use a `BufferedWriter`
+- Use an `OutputStream`
+- Use an `OutputStreamWriter`
+- Use a `FileWriter`
+
+---
+
+## tl;dr
+
+### Use FileWriter
+
+---
+
+## Writing to a File
+
+```java
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class FileWriterSimple {
+  public static final String FILE_TO_WRITE = "./boom.txt";
+
+  public static void main(String[] args) throws IOException {
+    File fileToCreate = new File(FILE_TO_WRITE);
+    FileWriter fileWriter = new FileWriter(fileToCreate);
+    fileWriter.write("BOOM");
+    fileWriter.close();
+
+    if (fileToCreate.exists()) {
+      System.out.println("File created.");
+    }
+  }
+}
+```
+
+---
+
+## Appending to File
+
+```java
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class FileAppenderSimple {
+  public static final String FILE_TO_WRITE = "./boom.txt";
+
+  public static void main(String[] args) throws IOException {
+    File fileToCreate = new File(FILE_TO_WRITE);
+    FileWriter fileWriter = new FileWriter(fileToCreate, true);
+    fileWriter.write(" goes the dynamite");
+    fileWriter.close();
+
+    if (fileToCreate.exists()) {
+      System.out.println("File created.");
+    }
+  }
+}
+```
