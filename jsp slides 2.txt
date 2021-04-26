@@ -1,0 +1,253 @@
+# JSP Built-In Objects
+
+---
+
+## First, a Word on Tomcat
+
+- Tomcat can be fairly temperamental
+- It's easy to forget about a running process with multiple projects open
+- It's easy for something to go wrong with changes taking effect
+
+---
+
+## Tomcat Debugging Steps
+
+- Ensure you don't already have a running instance of tomcat - look for open tabs in Intellij
+- Ensure your `web.xml` is located in the proper place and references the proper files
+- Ensure all paths references in your `web.xml` are absolute paths
+- Ensure your `pom.xml` specifies an absolute `path` and a `port`
+- Run `tomcat7:shutdown`
+- Run `clean` from the `Lifecycle` list
+- Run `tomcat7:run`
+
+---
+
+## What is a Java Server Page?
+
+---
+
+## Java Classes to Write HTML - A Bad Idea
+
+We _could_ do this in a servlet:
+```java
+@Override
+protected void doGet(HttpServletRequest req,
+    HttpServletResponse resp)
+    throws ServletException, IOException {
+
+  PrintWriter writer = resp.getWriter();
+  String firstName = req.getParameter("first_name");
+    resp.setContentType("text/html");
+  writer.println("<!DOCTYPE HTML>");
+  writer.println("<html>");
+  writer.println("  <head>");
+  writer.println("    <title>First Servlet</title>");
+  writer.println("  </head>");
+  writer.println("  <body>");
+  writer.println("</html>)";
+}
+
+```
+
+---
+
+## This Pain Became Real so...JSP
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JSP</title>
+  </head>
+  <body>
+    <p>The date is <%= (new java.util.Date()).toLocaleString() %></p>
+  </body>
+</html>
+```
+
+---
+
+## Then there was an over-correction...
+
+Too much logic in JSPs
+
+```jsp
+<%@ page import = "java.util.List, java.sql.*" %>
+
+<%
+  Class.forName("com.mysql.jdbc.Driver");
+  Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db", "dbuser", "dbpass");
+%>
+
+<%!
+  public List<Product> getProducts(Connection conn) throws SQLException {
+  ArrayList<Product> products = new ArrayList<Product>();
+
+  String sql = "SELECT id, name FROM product";
+  PreparedStatement stmt = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+  ResultSet resultSet = stmt.executeQuery();
+  ...
+%>
+```
+
+---
+
+## So, What do we do?
+
+- Like with Handlebars, we limit logic in the view
+- We will rely on a supporting servlet to manage the business logic
+- View logic should be isolated to **presentation**
+
+---
+
+## Model, View, Controller
+
+- **Models** - _business logic_. We should relegate as much data manipulation and computation to these classes as possible.
+- **Controllers** - _traffic logic_. Responsible for receiving the HTTP Request and determining what to do with it. In order to do its work, controllers almost always have to serve as the intermediary between models and views.
+- **Views** - _presentation logic_ - responsible for presenting the user with relevant information.
+
+---
+
+## Phases of Loading a Java Server Page
+
+1. Translation - transform the JSP into a servlet
+1. Compilation - the derived servlet is compiled
+1. Class Loading - loads the resulting `.class` file into the container
+1. Instantiation - instance of the servlet is created
+1. Initialization - code can be run right after instantiation
+1. Request Processing - contextual to HTTP requests that get issued against the servlet
+1. Destroy - the application server decides the servlet is no longer needed
+
+---
+
+## Anatomy of a Good Java Server Page
+
+- Limit logic to iteration and conditionally displaying information
+- Rely on the controller (later tonight) to do all other heavy lifting
+
+---
+
+## Built-In / Implicit Objects
+
+- page
+- session
+- request
+- response
+- application
+- include
+
+Predefined variables that provide the JSP with context. We get them for free.
+
+---
+
+## Page
+
+- otherwise known as `this` in the context of our JSP
+- set `import`s, `language`, and `content`
+
+---
+
+## Page Example
+
+```jsp
+<%@ page
+  language="java"
+  contentType="text/html; charset=UTF-8" %>
+  import="java.util.Date" %>
+
+```
+
+### You can also set custom properties on the page
+
+---
+
+## Session
+
+- HTTP is a stateless protocol
+- If we want to retain data about a client, we must do so with a cookie
+- A Session is a cookie that lasts the life of the browser session
+- More on sessions and cookies later this week
+
+---
+
+## Session Use Cases
+
+- Sign In / Authentication
+- Shopping Cart
+- Location specific data
+
+*We will generally relegate working with the session to a Java servlet. Use inside a JSP sparingly.*
+
+---
+
+## Request Context
+
+- Abstraction of the HTTP Request
+- Get the path, query string, or form parameters
+
+*We will generally relegate working with the request to a Java servlet. Use inside a JSP sparingly.*
+
+---
+
+## Request
+
+```java
+<%= request.getCurrentPath() %>
+<%= request.getParameter("firstName") %>
+```
+
+---
+
+## Response
+
+- Abstraction of the HTTP Response
+- We can manipulate this response before it is send to the user
+
+---
+
+## Response
+
+```jsp
+<%= response.sendRedirect("/"); %>
+```
+
+---
+
+## Application
+
+- Tied to our `web.xml`
+- Used to retrieve config variables
+
+---
+
+## Application
+
+```xml
+<web-app>
+  <context-param>
+    <param-name>applicationName</param-name>
+    <param-value>Connect4</param-value>
+  </context-param>
+</web-app>  
+```
+
+```jsp
+<%= application.getInitParameter("applicationName") %>
+```
+
+## Include
+
+- Extract commonly used templates
+- Good for navigation, headers, and footers
+
+---
+
+## Include
+
+```jsp
+<%@ include file="header.jsp" %>
+<%@ include file="navigation.jsp" %>
+<p>Your content here</p>
+<%@ include file="footer.jsp" %>
+```
