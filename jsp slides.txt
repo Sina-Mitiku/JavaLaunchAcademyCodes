@@ -1,0 +1,431 @@
+# Introduction to JSP
+
+---
+
+## Request / Response
+
+As you know, the browser and your server basically sends messages back and forth as a way of communicating to each other.
+
+The browser makes a `request` to the server and the server is responsible to giving the browser a `response`.
+
+Now what the server does is what we're interested in.
+
+---
+
+## Our friendly Tomcat
+
+`Tomcat` is a `Servlet Container` for Java on the Web. A servlet container is responsible for taking all the requests and hooking it up with the Java code return the response.
+
+It is like with Express, it gathers up the request and response and forwards it on to Servlet or JSP that will process it.
+
+---
+Java Servlet
+
+```Java
+public class SimpleServlet extends HttpServlet {
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+    }
+
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+            throws ServletException, IOException {
+        // save stuff and redirect
+    }
+
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+            throws ServletException, IOException {
+        // respond with some JSP
+    }
+}
+```
+
+---
+
+## JSP
+
+- A `Java Servlet Page`
+- Like what you saw with Handlebars
+- Start with some `HTML` and add commands to it to produce your pages
+
+---
+
+## Java Server Page (JSP)
+
+It is an HTML file with JSP commands.
+
+```HTML
+<%@page import="com.launchacademy.greeting.SimpleGreeting"%>
+<html>
+  <body>
+    <h2>Hello World!</h2>
+    <br/>
+
+    <% SimpleGreeting greeting = new SimpleGreeting("Jon Snow");%>
+    <p><%=greeting.getMessage()%></p>
+  </body>
+</html>
+```
+
+---
+
+JSPs help your servlet class by supplying a HTML file with JSP commands inside of it.
+
+The JSP pages follow these phases:
+
+1. Translation of JSP Page
+2. Compilation of JSP Page
+3. Classloading (the classloader loads class file)
+4. Instantiation (Object of the Generated Servlet is created).
+5. Initialization ( the container invokes jspInit() method).
+6. Request processing ( the container invokes \_jspService() method).
+7. Destroy ( the container invokes jspDestroy() method).
+
+---
+
+Now let's create our web page under the `webapp` directory. I'll add an additional directory as defined by the url pattern given in either the `web.xml` or the `@WebServlet` annotation.
+
+So I will now have
+
+webapp
+
+> greeting
+>
+> > index.jsp
+
+---
+
+## index.jsp
+
+Here is a simple JSP file.
+
+```html
+<%@page import="com.launchacademy.greeting.SimpleGreeting" %>
+<html>
+  <body>
+    <h2>Hello World!</h2>
+    <br />
+    <% SimpleGreeting greeting = new SimpleGreeting("Jon Snow");%>
+    <p><%=greeting.getMessage()%></p>
+  </body>
+</html>
+```
+
+---
+
+## SimpleGreeting.java
+
+I refer to this class in the JSP.
+
+```java
+public class SimpleGreeting {
+  private static final String message = "Hello! My name is %s";
+  private String name;
+
+  public Greeting(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public String getMessage() {
+    return String.format(message, name);
+  }
+}
+```
+
+---
+
+## Quick syntax of JSPs
+
+### Delimiters in JSPs
+
+There are multiple ways of inserting scripts into the HTML using the standard delimiters `<%...%>`.
+
+#### JSP scriptlets
+
+The easiest (and most common) is the JSP scriptlet. Use `<%...%>` with Java in the middle.
+
+For example:
+
+```jsp
+  <%
+    int max = 4;
+    for (int i=0; i < max; i++)
+  %>
+    <!-- do HTML stuff here -->
+<% } %>
+```
+
+---
+
+### JSP Expression
+
+JSPs allow you to add expressions to your page. Use the `<%=...%>`. You can insert a value in the middle of the statement.
+
+For Example, to use a value:
+
+```jsp
+<% int i = 5 %>
+<p>The number is <%= i %></p>
+```
+
+---
+
+### JSP Directives
+
+The directives allows you to add taglibs, include pages, configure current page, etc. Use `<%@...%>`.
+
+For Example, to use a directive:
+
+```HTML
+`<%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>`
+```
+
+which will allow us to use the `jstl` tagging library
+
+---
+
+### JSP Declaration
+
+We can declare data in JSP by using the `<%!...%>`.
+
+To use a Declaration
+
+```HTML
+  <%! String message = "Hello " %>
+  <%= message + "Jon Snow" %>
+```
+
+---
+
+## Inserting JSPs inside of JSPs
+
+I can include another JSP or HTML file into my JSP.
+
+```HTML
+  <%@include file="error.jsp" %>
+```
+
+---
+
+## Examples
+
+```HTML
+  <%@include file="includes/header.jsp" %>
+```
+inserts a header page into my page.
+
+If I want to include a footer:
+```HTML
+  <%@include file="includes/footer.jsp"%>
+```
+
+---
+
+## Getting to a method of a class
+
+You can use the Declaration statement to create an object from a class. Of course, you have to say where that class is by calling
+```HTML
+<%@page import="com.launchacademy.greeting.SimpleGreeting" %>
+```
+at the top of the page.
+
+Then you can call
+```HTML
+<%= SimpleGreeting greeting = new SimpleGreeting("Jon Snow")%>
+```
+
+---
+
+## JSP Expression Language (EL)
+
+`${expr}` is the format of EL. You can formulate any valid expression in between the `${` and `}`
+
+For example, `%${50*5}` will output 250.
+
+---
+
+## JSTL
+
+The `JavaScript Standard Type Libraries` are important. They take common tasks and wrap them into a library.
+
+To add the JSTLs, we add `<%@ taglib...%>` at the top of your JSP.
+
+The Core type library is pulled into your JSP by adding
+
+`<%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>`
+
+---
+
+You can now perform an `if` statement.
+
+```jsp
+<html>
+   <head>
+      <title><c:if> Tag Example</title>
+   </head>
+
+   <body>
+      <c:set var = "salary" scope = "session" value = "${2000*2}"/>
+      <c:if test = "${salary > 2000}">
+         <p>My salary is:  <c:out value = "${salary}"/><p>
+      </c:if>
+   </body>
+</html>
+```
+
+---
+
+Or you can do a `choose` statement
+
+```jsp
+<body>
+  <c:set var="salary" scope="session" value="${2000*2}" />
+  <p>Your salary is : <c:out value="${salary}" /></p>
+  <c:choose>
+    <c:when test="${salary <= 0}">
+      Salary is very low to survive.
+    </c:when>
+    <c:when test="${salary > 1000}">
+      Salary is very good.
+    </c:when>
+    <c:otherwise>
+      No comment sir...
+    </c:otherwise>
+  </c:choose>
+</body>
+```
+
+---
+
+## The Formatting Library
+
+`<%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>`
+
+```jsp
+<body>
+   <h3>Number Format:</h3>
+   <c:set var = "now" value = "<% = new java.util.Date()%>" />
+
+   <p>Formatted Date (1): <fmt:formatDate type = "time"
+      value = "${now}" /></p>
+
+   <p>Formatted Date (2): <fmt:formatDate type = "date"
+      value = "${now}" /></p>
+```
+
+Produces
+
+```no-highlight
+Formatted Date (1): 14:27:18
+Formatted Date (2): 23-Sep-2010
+```
+
+---
+
+There are a several JSTL libraries out there.
+
+SQL
+`<%@ taglib prefix = "sql" uri = "http://java.sun.com/jsp/jstl/sql" %>`
+
+XML processing `<%@ taglib prefix = "x" uri = "http://java.sun.com/jsp/jstl/xml" %>`
+
+Functions `<%@ taglib prefix = "fn" uri = "http://java.sun.com/jsp/jstl/functions" %>`
+
+---
+
+## Java code on the Web
+
+```xml
+<dependency>
+  <groupId>javax.servlet</groupId>
+  <artifactId>javax.servlet-api</artifactId>
+  <version>4.0.1</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+Notice the scope, "provided" is used for JARs that are provided in your servlet container.
+
+---
+
+We must add the `Tomcat` plugin to the `pom.xml` as well.
+
+```xml
+<plugin>
+   <groupId>org.apache.tomcat.maven</groupId>
+   <artifactId>tomcat7-maven-plugin</artifactId>
+   <version>2.2</version>
+   <configuration>
+     <port>8080</port>
+     <path>/</path>
+   </configuration>
+ </plugin>
+```
+
+The other changes to the pom is
+
+```xml
+<packaging>war</packaging>
+```
+
+This will tell Maven that we want to produce a `WAR` file, not a `JAR`.
+
+---
+
+## web.xml
+
+The `web.xml` file is the old standard way of attaching your servlet to the container.
+
+```xml
+<web-app>
+  <servlet>
+    <servlet-name>GreetingServlet</servlet-name>
+    <servlet-class>com.launchacademy.greeting.GreetingServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GreetingServlet</servlet-name>
+    <url-pattern>/greeting</url-pattern>
+  </servlet-mapping>
+</web-app>
+```
+
+`<servlet>`
+The servlet tag give the name of the servlet and the class.
+
+`<servlet-mapping>`
+Takes the servlet name and assigns a URL mapping for when the servlet will fire.
+
+---
+
+## @WebServlet
+
+A new way of handling the tasks of the `web.xml` file since ServletEngine 2.5 is to use the `@WebServlet` annotation.
+
+```Java
+@WebServlet(
+ name = "GreetingServlet",
+ description = "This is my annotated servlet Greeting",
+ urlPatterns = "/greeting",
+ loadOnStartup = 1)
+public class GreetingServlet extends HttpServlet {
+...
+}
+```
+
+The `<servlet>` tag is replaced by the `@WebServlet`. It will pull the name and package information from the class definition.
+
+The `urlPatterns` replaces the `<url-pattern>`.
+
+The `loadOnStartup=1` states that I want this servlet to load on startup.
+
+---
+
+## In conclusion
+
+This is shows the most simple facets of JSPs and Java Servlets. We will get into it more next week.
