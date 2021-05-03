@@ -1,0 +1,231 @@
+# Spring Controllers and Dependency Injection
+
+---
+
+## Our First Controller
+
+```java
+@Controller
+@RequestMapping("/awards")
+public class AwardsController {
+}
+```
+
+- Spring <3's annotations
+- We place all controller classes in a `controllers` package
+- `@Controller` indicates we're building a a controller
+- `@RequestMapping` is where the controller "mounts"
+
+---
+
+## Our First Endpoint
+
+```java
+@GetMapping
+public String getAwards(Model model) {
+  model.addAttribute("awards", {"Queen of Shuffleboard", "VSCode Champion"});
+  return "awards/index";
+}
+```
+
+- `@GetMapping` with zero arguments handles a `GET` to the controller's request mapping
+- `@GetMapping` can take an argument that appends to the requestmapping
+- We use a `ui.Model` to share context between the controller and view
+- We return a string that reflects the path to a view template
+
+---
+
+## Using the Query String
+
+```java
+@GetMapping
+public String getAwards(@RequestParam String category, Model model) {
+  if(category.equals("funny")) {
+    model.addAttribute("awards", {{"Queen of Shuffleboard", "VSCode Champion"});
+  }
+  else {
+    model.addAttribute("awards", {});
+  }
+  return "awards/index";
+}
+```
+
+- The `@RequestParam` annotation looks for `category` in the query string and the request body
+- Annotations are valid in the context of an argument
+
+---
+
+## Dynamic Paths
+
+```java
+@GetMapping("/by-category/{category}")
+public String getAwardsByCategory(@PathVariable String category, Model model) {
+  if(category.equals("funny")) {
+    model.addAttribute("awards", {"Queen of Shuffleboard", "VSCode Champion"});
+  }
+  else {
+    model.addAttribute("awards", {});
+  }
+  return "awards/index";
+}
+```
+
+---
+
+## What about POSTs?
+
+- We map in a similar way
+- We read in parameters from the request body
+
+---
+
+## Define an Award Class
+
+```java
+public class Award {
+  private String recipient;
+  private String awardName;
+
+  public Award(String recipient, String awardName) {
+    this.recipient = recipient;
+    this.awardName = awardName;
+  }
+}
+```
+
+---
+
+## Handling POSTs
+
+```java
+@PostMapping
+public String createAward(
+  @RequestParameter String recipient,
+  @RequestParameter String awardName,
+  Model model) {
+
+  Award award = new Award(recipient, awardName)
+  //pseudocode
+  award.save();
+
+  return "redirect:/awards";
+}
+```
+
+- responds to a POST to `/awards`
+- An Entity emerges
+- We can use a `redirect:` prefix in our return to redirect the user
+- As we add attributes to the `Award`, our arglist grows in size
+
+---
+
+## A Better Way: Define a Bean
+
+```java
+import org.springframework.stereotype.Component;
+
+@Component
+public class Award {
+  private String recipient;
+  private String awardName;
+
+  //getters and setters
+}
+```
+
+- This is a **Java bean** because all fields are private and it supports a zero argument constructor
+- It is a **Spring bean** due to the `@Component` annotation - more on this later
+
+---
+
+## @ModelAttribute
+
+```java
+public String createAward(@ModelAttribute Award award) {
+  //pseudocode
+  award.save();
+
+  return "redirect:/awards";
+}
+```
+
+- Because we've defined a Spring bean for `Award`, we can effectively **autowire** it as a `@ModelAttribute`
+- Convention over configuration wise, Spring will use the form payload to populate our `Award` instance
+
+---
+
+## Wait, How does it do that?
+
+- Spring implements a design pattern known as **dependency injection**
+
+---
+
+## How We've Learned to Date
+
+```java
+@PostMapping
+public String createAward(
+  @RequestParameter String recipient,
+  @RequestParameter String awardName,
+  Model model) {
+
+  Award award = new Award(recipient, awardName)
+  //pseudocode
+  award.save();
+
+  return "redirect:/awards";
+}
+```
+
+- With this approach, we create what we need. This is cumbersome, because we have to know **how** to create the `Award`
+- The DI approach says: _we are given what we need_
+
+---
+
+## The Dependency Injection Way
+
+```java
+public String createAward(@ModelAttribute Award award) {
+  //pseudocode
+  award.save();
+
+  return "redirect:/awards";
+}
+```
+
+- This makes testing easier
+- This changes coupling / dependency relationships
+- The user of the `Award` interface no longer requires context as to how it's instantiated
+
+---
+
+## A Metaphor for Dependency Injection
+
+When you go and get things out of the refrigerator for yourself, you can cause problems. You might leave the door open, you might get something Mommy or Daddy doesn't want you to have. You might even be looking for something we don't even have or which has expired.
+
+What you should be doing is stating a need, "I need something to drink with lunch", and then we will make sure you have something when you sit down to eat."
+
+[Credit][di-metaphor]
+
+---
+
+## So, where exactly is the constructor called?
+
+- In the Inversion of Control (IoC) Container
+- This is a key design aspect of Spring
+- The IoC Container manages the instantiation of objects we wish to inject into other classes
+
+---
+
+## In this particular example:
+
+- Prior to the request being processed by the endpoint, the IoC Container instantiates the `award` Spring bean instance, and because we annotate it with `@ModelAttribute`, the bean's setters are called for each correlating request parameter.
+
+[di-metaphor]: https://stackoverflow.com/questions/1638919/how-to-explain-dependency-injection-to-a-5-year-old
+
+---
+
+## This Will Feel Magic For a While
+
+- Understanding Dependency Injection will take some time, and it won't be immediately clear at first pass
+- We'll continue to flirt with the concept until you get more Spring under your belt
